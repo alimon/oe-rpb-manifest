@@ -246,10 +246,34 @@ cat > conf/auto.conf <<EOF
 DISTRO ?= "${DISTRO}"
 MACHINE ?= "${MACHINE}"
 SDKMACHINE ?= "${SDKMACHINE}"
+EOF
+
+RPB_MULTICONFIG=0
+if [ "${MACHINE}" = "dragonboard-410c-32" ]; then
+	RPB_MULTICONFIG=1
+	RPB_MULTICONFIG_MACHINE_KERNEL="dragonboard-410c"
+fi
+if [ ${RPB_MULTICONFIG} -eq 1 ]; then
+	cat >> conf/auto.conf <<EOF
+
+BBMULTICONFIG ?= "arm64"
+RPB_MULTICONFIG ?= "${RPB_MULTICONFIG}"
+RPB_MULTICONFIG_MACHINE_KERNEL ?= "${RPB_MULTICONFIG_MACHINE_KERNEL}"
+EOF
+
+	mkdir conf/multiconfig
+	cat > conf/multiconfig/arm64.conf <<EOF
+MACHINE = "${RPB_MULTICONFIG_MACHINE_KERNEL}"
+TMPDIR = "\${TOPDIR}/tmp-\${DISTRO}-\${MACHINE}"
+EOF
+fi
+
+cat >> conf/auto.conf <<EOF
 
 # Extra options that can be changed by the user
 INHERIT += "rm_work"
 EOF
+
 if [ ! -e conf/site.conf ]; then
     cat > conf/site.conf <<_EOF
 
